@@ -6,12 +6,25 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
+
+      # 🔐 Login to DockerHub
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 🏗️ Build and Push Backend
+      - name: Build and Push Backend
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/relayiq-backend:latest ./backend
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/relayiq-backend:latest
 
       # Install kubectl
       - name: Setup kubectl
@@ -25,18 +38,12 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
 
-      # Apply manifests
-      - name: Deploy to Kubernetes
+      # 🚀 Deploy to Kubernetes
+      - name: Deploy Manifests
         run: |
           kubectl apply -f k8s/postgres.yaml
           kubectl apply -f k8s/backend-deployment.yaml
           kubectl apply -f k8s/backend-service.yaml
           kubectl apply -f k8s/frontend-deployment.yaml
           kubectl apply -f k8s/frontend-service.yaml
-
-      # Check rollout status
-      - name: Verify Deployment
-        run: |
-          kubectl get nodes
-          kubectl get pods -o wide
 
