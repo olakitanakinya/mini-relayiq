@@ -38,12 +38,12 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
 
-      # 🚀 Deploy to Kubernetes
+      # 🚀 Deploy to Kubernetes (skip TLS verification)
       - name: Deploy Manifests
         run: |
-          kubectl apply -f k8s/postgres.yaml
-          kubectl apply -f k8s/backend-deployment.yaml
-          kubectl apply -f k8s/backend-service.yaml
-          kubectl apply -f k8s/frontend-deployment.yaml
-          kubectl apply -f k8s/frontend-service.yaml
+          kubectl --insecure-skip-tls-verify apply -f k8s/postgres.yaml
+          kubectl --insecure-skip-tls-verify apply -f k8s/backend-deployment.yaml
+          kubectl --insecure-skip-tls-verify apply -f k8s/backend-service.yaml
+          kubectl --insecure-skip-tls-verify apply -f k8s/frontend-deployment.yaml
+          kubectl --insecure-skip-tls-verify apply -f k8s/frontend-service.yaml
 
