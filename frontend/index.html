@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mini RelayIQ</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/javascript">
+    const { useState, useEffect } = React;
+
+    function App() {
+      const [handovers, setHandovers] = useState([]);
+      const [title, setTitle] = useState("");
+      const [details, setDetails] = useState("");
+
+      const fetchHandovers = async () => {
+        const res = await axios.get("/api/handovers");
+        setHandovers(res.data);
+      };
+
+      const addHandover = async () => {
+        await axios.post("/api/handovers", { title, details });
+        setTitle("");
+        setDetails("");
+        fetchHandovers();
+      };
+
+      useEffect(() => { fetchHandovers(); }, []);
+
+      return (
+        React.createElement("div", null,
+          React.createElement("h2", null, "Mini RelayIQ"),
+          React.createElement("input", {
+            value: title, onChange: e => setTitle(e.target.value), placeholder: "Title"
+          }),
+          React.createElement("input", {
+            value: details, onChange: e => setDetails(e.target.value), placeholder: "Details"
+          }),
+          React.createElement("button", { onClick: addHandover }, "Add Handover"),
+          React.createElement("ul", null,
+            handovers.map(h => React.createElement("li", { key: h.id },
+              `${h.title}: ${h.details}`
+            ))
+          )
+        )
+      );
+    }
+
+    ReactDOM.render(React.createElement(App), document.getElementById("root"));
+  </script>
+</body>
+</html>
+
